@@ -5,6 +5,8 @@
  */
 package com.smegi.bonusi;
 
+import com.smegi.bonusi.model.Excel;
+
 /**
  *
  * @author Pakijaner
@@ -74,6 +76,9 @@ public class Bonusi extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new Bonusi().setVisible(true);
+                
+                Excel excel = new Excel();
+                excel.getExcelBonuses(2);
             }
         });
     }
