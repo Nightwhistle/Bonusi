@@ -5,15 +5,46 @@
  */
 package com.smegi.bonusi.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Sergej
  */
 public class User {
     
+    private int id;
     private String name;
-    private double[] transactions = new double[12];
+    private List<Transaction> transactions = new ArrayList<Transaction>();
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
     
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(List<Transaction> transactions) {
+        this.transactions = transactions;
+    }
+    
+    public void addTransaction(Transaction transaction) {
+        this.transactions.add(transaction);
+    }
     
     
 }

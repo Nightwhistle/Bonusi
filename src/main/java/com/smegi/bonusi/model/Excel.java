@@ -27,8 +27,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class Excel {
     private final String path = "d:\\Temp\\2016.xlsx";
     
-    public List<ExcelBonus> getExcelBonuses(int month) {
-        ExcelBonus excelBonus = new ExcelBonus();
+    public List getExcelBonuses(int month) {
         
         try {
             FileInputStream inputStream = new FileInputStream(new File(path));
@@ -67,6 +66,6 @@ public class Excel {
         
         
         
-        return new ArrayList<ExcelBonus>();
+        return new ArrayList<>();
     }
 }

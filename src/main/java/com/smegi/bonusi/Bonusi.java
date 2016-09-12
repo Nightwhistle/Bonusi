@@ -5,11 +5,14 @@
  */
 package com.smegi.bonusi;
 
+import com.smegi.bonusi.model.Database;
 import com.smegi.bonusi.model.Excel;
+import com.smegi.bonusi.model.User;
+import java.util.List;
 
 /**
  *
- * @author Pakijaner
+ * @author Sergej
  */
 public class Bonusi extends javax.swing.JFrame {
 
@@ -79,6 +82,9 @@ public class Bonusi extends javax.swing.JFrame {
                 
                 Excel excel = new Excel();
                 excel.getExcelBonuses(2);
+                
+                Database db = new Database();
+                List<User> ul = db.getUsersList();
             }
         });
     }
