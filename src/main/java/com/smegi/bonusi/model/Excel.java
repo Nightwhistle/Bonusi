@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -25,37 +26,52 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  * @author Sergej
  */
 public class Excel {
+
     private final String path = "d:\\Temp\\2016.xlsx";
+    private List<User> users = new ArrayList<>();
+
+    public Excel(List<User> users) {
+        this.users = users;
+    }
     
-    public List getExcelBonuses(int month) {
-        
+    public void getExcelBonuses(int month) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2016, month - 1, Calendar.DAY_OF_MONTH);
         try {
             FileInputStream inputStream = new FileInputStream(new File(path));
             Workbook workbook = new XSSFWorkbook(inputStream);
-            Sheet sheet = workbook.getSheetAt(month-1);
-            Iterator<Row> iterator = sheet.iterator();
-            
-            while (iterator.hasNext()) {
-                Row nextRow = iterator.next();
-                Iterator<Cell> cellIterator = nextRow.cellIterator();
-                
-                while (cellIterator.hasNext()) {
-                Cell cell = cellIterator.next();
-                 
-                switch (cell.getCellType()) {
-                    case Cell.CELL_TYPE_STRING:
-                        System.out.print(cell.getStringCellValue());
-                        break;
-                    case Cell.CELL_TYPE_BOOLEAN:
-                        System.out.print(cell.getBooleanCellValue());
-                        break;
-                    case Cell.CELL_TYPE_NUMERIC:
-                        System.out.print(cell.getNumericCellValue());
-                        break;
+            Sheet sheet = workbook.getSheetAt(month - 1);
+
+            for (int i = 2; i < sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                String username = "";
+                int bonuses = 0;
+                for (int j = 1; j < row.getLastCellNum(); j++) {
+                    //getting username
+                    
+                    Cell cell = row.getCell(j);
+                    if (j == 1) {
+                        username = cell.toString();
+                        continue;
+                    }
+                    
+                    if (cell.toString() != "") {
+                        bonuses++;
+                    }
                 }
-                System.out.print(" - ");
-            }
-            System.out.println();
+                
+                // updating user in userslist
+                for (User user : users) {
+                    if (user.getName().equalsIgnoreCase(username)) {
+                        System.out.println("Found username in base: " + username);
+                        System.out.println("    - adding bonuses: " + bonuses);
+                        
+                        user.addExcelBonusi(calendar, bonuses);
+                        break;
+                    }
+                }
+                
+                
             }
             
         } catch (FileNotFoundException ex) {
@@ -64,8 +80,5 @@ public class Excel {
             Logger.getLogger(Excel.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        
-        
-        return new ArrayList<>();
     }
 }

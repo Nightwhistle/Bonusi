@@ -9,6 +9,7 @@ import com.smegi.bonusi.model.Database;
 import com.smegi.bonusi.model.Excel;
 import com.smegi.bonusi.model.User;
 import java.util.List;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -32,18 +33,39 @@ public class Bonusi extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        panel_north = new javax.swing.JPanel();
+        label_bonusi = new javax.swing.JLabel();
+        button_refresh = new javax.swing.JButton();
+        scrollpane_table = new javax.swing.JScrollPane();
+        table_mainTable = new javax.swing.JTable();
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
-        );
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        getContentPane().setLayout(new java.awt.BorderLayout(5, 5));
+
+        panel_north.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 50, 5, 50));
+        panel_north.setLayout(new java.awt.GridLayout(2, 1, 5, 5));
+
+        label_bonusi.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        label_bonusi.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        label_bonusi.setText("Bonusi");
+        panel_north.add(label_bonusi);
+
+        button_refresh.setText("Refresh");
+        panel_north.add(button_refresh);
+
+        getContentPane().add(panel_north, java.awt.BorderLayout.NORTH);
+
+        table_mainTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        scrollpane_table.setViewportView(table_mainTable);
+
+        getContentPane().add(scrollpane_table, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -79,16 +101,28 @@ public class Bonusi extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new Bonusi().setVisible(true);
-                
-                Excel excel = new Excel();
-                excel.getExcelBonuses(2);
-                
+
                 Database db = new Database();
                 List<User> ul = db.getUsersList();
+                for (User user : ul) {
+                 //   System.out.println(user.getId() + " Username: " + user.getName() + " Paid: " + user.getTotalPaymentsForCurrentYear());
+                }
+
+                Excel excel = new Excel(ul);
+                excel.getExcelBonuses(9);
+                
+                DefaultTableModel model = (DefaultTableModel) table_mainTable.getModel();
+                model.addRow(new Object[]{"asdf", 12, 15});
+
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton button_refresh;
+    private javax.swing.JLabel label_bonusi;
+    private javax.swing.JPanel panel_north;
+    private javax.swing.JScrollPane scrollpane_table;
+    private javax.swing.JTable table_mainTable;
     // End of variables declaration//GEN-END:variables
 }
