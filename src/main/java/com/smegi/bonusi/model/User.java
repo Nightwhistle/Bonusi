@@ -20,7 +20,7 @@ public class User {
     private int id;
     private String name;
     private List<Transaction> transactions = new ArrayList<>();
-    private Map<Calendar, Integer> excelBonusi = new HashMap<>();
+    private Map<String, Integer> excelBonusi = new HashMap<>();
 
     public int getId() {
         return id;
@@ -46,15 +46,15 @@ public class User {
         this.transactions = transactions;
     }
 
-    public Map<Calendar, Integer> getExcelBonusi() {
+    public Map<String, Integer> getExcelBonusi() {
         return excelBonusi;
     }
 
-    public void setExcelBonusi(Map<Calendar, Integer> excelBonusi) {
+    public void setExcelBonusi(Map<String, Integer> excelBonusi) {
         this.excelBonusi = excelBonusi;
     }
     
-    public void addExcelBonusi(Calendar calendar, int bonusi) {
+    public void addExcelBonusi(String calendar, int bonusi) {
         excelBonusi.put(calendar, bonusi);
     }
 
@@ -71,7 +71,10 @@ public class User {
         int month = calendar.get(Calendar.MONTH);
         int year = calendar.get(Calendar.YEAR);
         return calculatePaymentsForMonth(month, year);
-
+    }
+    
+    public int getMissingToBonusThisMonth() {
+        return 600 - (getTotalPaymentsForCurrentMonth() % 600);
     }
     
     public int getTotalPaymentsForCurrentYear() {
@@ -86,9 +89,11 @@ public class User {
     
     public int calculateMissingBonuses(int month, int year) {
         int excelBonuses = 0;
-        for (Map.Entry<Calendar, Integer> set : excelBonusi.entrySet()) {
-            Calendar key = set.getKey();
-            if (key.get(Calendar.MONTH) == month && key.get(Calendar.YEAR) == year) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(year).append("-").append(month);
+        String date = sb.toString();
+        for (Map.Entry<String, Integer> set : excelBonusi.entrySet()) {
+            if (set.getKey().equalsIgnoreCase(date)) {
                 excelBonuses = set.getValue();
             }
         }
@@ -100,7 +105,7 @@ public class User {
         int total = 0;
         for (Transaction transaction : transactions) {
             if (transaction.getCalendar().get(Calendar.MONTH) == month && transaction.getCalendar().get(Calendar.YEAR) == year) {
-                total += transaction.getPayment();
+                total += Math.round(transaction.getPayment());
             }
         }
         return total;
@@ -108,6 +113,6 @@ public class User {
 
     private int calculateRequiredBonuses(int month, int year) {
         int paid = calculatePaymentsForMonth(month, year);
-        return paid % 600;
+        return Math.floorDiv(paid, 600);
     }
 }

@@ -8,8 +8,15 @@ package com.smegi.bonusi;
 import com.smegi.bonusi.model.Database;
 import com.smegi.bonusi.model.Excel;
 import com.smegi.bonusi.model.User;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.RowFilter;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 /**
  *
@@ -17,11 +24,38 @@ import javax.swing.table.DefaultTableModel;
  */
 public class Bonusi extends javax.swing.JFrame {
 
+    private static Database db;
+    private static List<User> ul;
+
     /**
      * Creates new form Bonusi
      */
     public Bonusi() {
         initComponents();
+        table_mainTable.getColumnModel().getColumn(0).setPreferredWidth(100);
+        table_mainTable.getColumnModel().getColumn(1).setPreferredWidth(30);
+        table_mainTable.getColumnModel().getColumn(2).setPreferredWidth(30);
+
+        textfield_Search.getDocument().addDocumentListener(new DocumentListener() {
+
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                filterTable();
+            }
+
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                filterTable();
+            }
+
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                filterTable();
+            }
+        });
+
+        db = new Database();
+
     }
 
     /**
@@ -36,14 +70,19 @@ public class Bonusi extends javax.swing.JFrame {
         panel_north = new javax.swing.JPanel();
         label_bonusi = new javax.swing.JLabel();
         button_refresh = new javax.swing.JButton();
+        textfield_Search = new javax.swing.JTextField();
         scrollpane_table = new javax.swing.JScrollPane();
         table_mainTable = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setBounds(new java.awt.Rectangle(5, 5, 5, 5));
+        setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        setName("Bonusi"); // NOI18N
+        setPreferredSize(new java.awt.Dimension(260, 600));
         getContentPane().setLayout(new java.awt.BorderLayout(5, 5));
 
         panel_north.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 50, 5, 50));
-        panel_north.setLayout(new java.awt.GridLayout(2, 1, 5, 5));
+        panel_north.setLayout(new java.awt.GridLayout(3, 1, 5, 5));
 
         label_bonusi.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
         label_bonusi.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -51,24 +90,89 @@ public class Bonusi extends javax.swing.JFrame {
         panel_north.add(label_bonusi);
 
         button_refresh.setText("Refresh");
+        button_refresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                button_refreshActionPerformed(evt);
+            }
+        });
         panel_north.add(button_refresh);
+        panel_north.add(textfield_Search);
 
         getContentPane().add(panel_north, java.awt.BorderLayout.NORTH);
 
+        table_mainTable.setAutoCreateRowSorter(true);
+        table_mainTable.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         table_mainTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-
+                "Username", "Uplatio", "Nedostaje"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        table_mainTable.setShowVerticalLines(false);
         scrollpane_table.setViewportView(table_mainTable);
 
         getContentPane().add(scrollpane_table, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void button_refreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_button_refreshActionPerformed
+
+        // Update table from database
+        ul = db.getUsersList();
+        Excel excel = new Excel(ul);
+        List<Object[]> rows = new ArrayList<>();
+        for (User user : ul) {
+            if (user.getTotalPaymentsForCurrentMonth() == 0) {
+                continue;
+            }
+            Object[] row = {user.getName(), user.getTotalPaymentsForCurrentMonth(), 600 - (user.getTotalPaymentsForCurrentMonth() % 600)};
+            rows.add(row);
+        }
+
+        addRow(rows);
+
+        // Check for missing bonuses
+        int missingBonuses = 0;
+        Calendar calendar = Calendar.getInstance();
+        int month = calendar.get(Calendar.MONTH);
+        int year = calendar.get(Calendar.YEAR);
+        StringBuilder sb = new StringBuilder();
+        StringBuilder missingBonusesText = new StringBuilder("NEDOSTAJE: \n");
+        sb.append(year)
+                .append("-")
+                .append(month);
+        excel.getExcelBonuses(month + 1);
+        for (User user : ul) {
+            if (user.calculateMissingBonuses(month, year) != 0) {
+                missingBonusesText.append("\n" + user.getName() + "\t treba da dobije " + user.calculateMissingBonuses(month, year) +" bonus");
+                missingBonuses++;
+            }
+        }
+        
+        if (missingBonuses != 0) {
+            JOptionPane.showMessageDialog(rootPane, missingBonusesText.toString());
+        }
+        db.setNews();
+        ul = null;
+    }//GEN-LAST:event_button_refreshActionPerformed
 
     /**
      * @param args the command line arguments
@@ -81,7 +185,7 @@ public class Bonusi extends javax.swing.JFrame {
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
+                if ("Windows".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }
@@ -102,20 +206,29 @@ public class Bonusi extends javax.swing.JFrame {
             public void run() {
                 new Bonusi().setVisible(true);
 
-                Database db = new Database();
-                List<User> ul = db.getUsersList();
-                for (User user : ul) {
-                 //   System.out.println(user.getId() + " Username: " + user.getName() + " Paid: " + user.getTotalPaymentsForCurrentYear());
-                }
-
-                Excel excel = new Excel(ul);
-                excel.getExcelBonuses(9);
-                
-                DefaultTableModel model = (DefaultTableModel) table_mainTable.getModel();
-                model.addRow(new Object[]{"asdf", 12, 15});
-
+//                Excel excel = new Excel(ul);
+//                excel.getExcelBonuses(9);
+                // Set sorting on Uplatio field (workaround :) )
+                table_mainTable.getRowSorter().toggleSortOrder(1);
+                table_mainTable.getRowSorter().toggleSortOrder(1);
             }
         });
+    }
+
+    // Adding rows in table, taking rows list
+    private void addRow(List<Object[]> rows) {
+        DefaultTableModel model = (DefaultTableModel) table_mainTable.getModel();
+        model.setRowCount(0);
+        for (Object[] row : rows) {
+            model.addRow(row);
+        }
+    }
+
+    private void filterTable() {
+        TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(((DefaultTableModel) table_mainTable.getModel()));
+        sorter.setRowFilter(RowFilter.regexFilter("(?i)" + textfield_Search.getText()));
+
+        table_mainTable.setRowSorter(sorter);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -123,6 +236,8 @@ public class Bonusi extends javax.swing.JFrame {
     private javax.swing.JLabel label_bonusi;
     private javax.swing.JPanel panel_north;
     private javax.swing.JScrollPane scrollpane_table;
-    private javax.swing.JTable table_mainTable;
+    private static javax.swing.JTable table_mainTable;
+    private javax.swing.JTextField textfield_Search;
     // End of variables declaration//GEN-END:variables
+
 }

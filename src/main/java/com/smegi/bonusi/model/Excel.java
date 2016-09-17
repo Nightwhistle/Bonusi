@@ -26,14 +26,14 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  * @author Sergej
  */
 public class Excel {
-
-    private final String path = "d:\\Temp\\2016.xlsx";
+    private final String path = "D:\\Posao\\Firme\\Portal\\Evidencija Portalaca\\Bonusi\\2016.xlsx";
+//    private final String path = "d:\\Temp\\2016.xlsx";
     private List<User> users = new ArrayList<>();
 
     public Excel(List<User> users) {
         this.users = users;
     }
-    
+
     public void getExcelBonuses(int month) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2016, month - 1, Calendar.DAY_OF_MONTH);
@@ -48,37 +48,38 @@ public class Excel {
                 int bonuses = 0;
                 for (int j = 1; j < row.getLastCellNum(); j++) {
                     //getting username
-                    
+
                     Cell cell = row.getCell(j);
                     if (j == 1) {
                         username = cell.toString();
                         continue;
                     }
-                    
+
                     if (cell.toString() != "") {
                         bonuses++;
                     }
                 }
-                
+
                 // updating user in userslist
                 for (User user : users) {
                     if (user.getName().equalsIgnoreCase(username)) {
-                        System.out.println("Found username in base: " + username);
-                        System.out.println("    - adding bonuses: " + bonuses);
-                        
-                        user.addExcelBonusi(calendar, bonuses);
+//                        System.out.println("Found username in base: " + username);
+//                        System.out.println("    - adding bonuses: " + bonuses);
+                        StringBuilder sb = new StringBuilder();
+                        sb.append(calendar.get(Calendar.YEAR))
+                                .append("-")
+                                .append((calendar.get(Calendar.MONTH)));
+                        user.addExcelBonusi(sb.toString(), bonuses);
                         break;
                     }
                 }
-                
-                
+
             }
-            
+
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Excel.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Excel.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
     }
 }
