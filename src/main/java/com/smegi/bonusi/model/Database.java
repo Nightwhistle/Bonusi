@@ -59,6 +59,7 @@ public class Database {
         Calendar dateTime = Calendar.getInstance();
         Calendar dateTimeExpire = Calendar.getInstance();
         dateTimeExpire.add(Calendar.DATE, 7);
+        
         StringBuilder top = new StringBuilder();
         StringBuilder nedostaje = new StringBuilder();
 
@@ -76,7 +77,7 @@ public class Database {
         }
 
         // Missing to bonus
-        int leastMissingTreshold = 600;
+        int leastMissingTreshold = 300;
         List<User> leastMissing = new ArrayList<>();
         for (User user : usersList) {
             if (user.getMissingToBonusThisMonth() <= leastMissingTreshold) {
@@ -98,8 +99,8 @@ public class Database {
                 table.deleteRow(row);
             }
             
-            table.addRow(Column.AUTO_NUMBER, "Nedostaje do bonusa", nedostaje.toString(), dateTime.getTimeInMillis(), dateTime.getTimeInMillis()+1, dateTimeExpire.getTimeInMillis(), 35, 3);
-            table.addRow(Column.AUTO_NUMBER, "Top uplate za ovaj mesec", top.toString(), dateTime.getTimeInMillis(), dateTime.getTimeInMillis(), dateTimeExpire.getTimeInMillis(), 35, 3);
+            table.addRow(Column.AUTO_NUMBER, "Nedostaje do bonusa", nedostaje.toString(), dateTime.getTimeInMillis()-1000, dateTime.getTimeInMillis(), dateTimeExpire.getTimeInMillis(), 35, 1);
+            table.addRow(Column.AUTO_NUMBER, "Top uplate za ovaj mesec", top.toString(), dateTime.getTimeInMillis()-5000, dateTime.getTimeInMillis(), dateTimeExpire.getTimeInMillis(), 35, 1);
             
 
         } catch (IOException ex) {
