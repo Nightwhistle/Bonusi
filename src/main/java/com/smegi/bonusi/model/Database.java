@@ -5,11 +5,12 @@
  */
 package com.smegi.bonusi.model;
 
-import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -60,8 +60,8 @@ public class Database {
         Calendar dateTimeExpire = Calendar.getInstance();
         dateTimeExpire.add(Calendar.DATE, 7);
         
-        StringBuilder top = new StringBuilder();
-        StringBuilder nedostaje = new StringBuilder();
+        StringBuilder top = new StringBuilder("\"Top uplate: \" ");
+        StringBuilder nedostaje = new StringBuilder("\"Nedostaje manje od 300din: \" ");
 
         // Top payers
         Collections.sort(usersList, new Comparator<User>() {
@@ -73,7 +73,7 @@ public class Database {
         int topUsers = 5; // how much top users to display
         List<User> topPayingUsers = usersList.subList(0, topUsers);
         for (User user : topPayingUsers) {
-            top.append("\n" + user.getName() + " - " + user.getTotalPaymentsForCurrentMonth());
+            top.append("& vbnewline & \"" + user.getName() + "\" & vbTab & \"" + user.getTotalPaymentsForCurrentMonth() + "\" ");
         }
 
         // Missing to bonus
@@ -91,21 +91,20 @@ public class Database {
             }
         });
         for (User user : leastMissing) {
-            nedostaje.append("["+ user.getName() + " - " + user.getMissingToBonusThisMonth() + "] ");
+            nedostaje.append("& vbnewline & \""+ user.getName() + "\" & vbTab & \"" + user.getMissingToBonusThisMonth() + "\"");
         }
+        
+        System.out.println(top.toString() + nedostaje.toString());
+        
+        File file = new File("E:\\Games\\bonusi.vbs");
         try {
-            Table table = DatabaseBuilder.open(new File(path)).getTable("News");
-            for (Row row : table) {
-                table.deleteRow(row);
-            }
-            
-            table.addRow(Column.AUTO_NUMBER, "Nedostaje do bonusa", nedostaje.toString(), dateTime.getTimeInMillis()-1000, dateTime.getTimeInMillis(), dateTimeExpire.getTimeInMillis(), 35, 1);
-            table.addRow(Column.AUTO_NUMBER, "Top uplate za ovaj mesec", top.toString(), dateTime.getTimeInMillis()-5000, dateTime.getTimeInMillis(), dateTimeExpire.getTimeInMillis(), 35, 1);
-            
-
+            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+            bw.write("msgbox " + top.toString() + " & vbNewLine & vbNewLine & " + nedostaje.toString());
+            bw.close();
         } catch (IOException ex) {
             Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
         }
+
 
     }
 
